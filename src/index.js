@@ -1,7 +1,12 @@
-export const makeGluer = () => {
+import { makeGlueImplFactoryService } from './services/glueImplFactoryService';
+import { makeMakeTraitService } from './services/makeTraitService';
+
+export const makeGluer = ({ validate }) => {
+  const makeTraitService = makeMakeTraitService();
+  const glueImplFactoryService = makeGlueImplFactoryService({ validatePort: { validate } });
+
   return {
-    makeInterface: () => {},
-    withInterface: () => {},
-    withImplementationFactory: () => {},
+    makeTrait: makeTraitService.makeTrait,
+    glueImplFactory: glueImplFactoryService.glueImplFactory,
   };
 };

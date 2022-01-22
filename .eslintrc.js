@@ -1,6 +1,9 @@
 module.exports = {
   extends: ['airbnb-base', 'prettier'],
   root: true,
+  env: {
+    es6: true,
+  },
   rules: {
     // On the contrary, we prefer named exports
     'import/prefer-default-export': 'off',
