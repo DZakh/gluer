@@ -18,7 +18,7 @@ When you design a complex application with a long lifespan, you have to lay down
 
 ## - Dude, just use TypeScript!
 
-*\- Yes, yes, thank you for the advice...*
+_\- Yes, yes, thank you for the advice..._
 
 But seriously, if you are already actively using TypeScript and don't have any problems with it, go ahead. The problems mentioned above are perfectly solved by it, and this package will only add more overhead.
 
@@ -28,7 +28,11 @@ For all other users, I won't argue whether you should use TS or something else, 
 - Performance marks for your logic
 
 ## TODO: Opinionated architecture decisions
+
 ## TODO: Runtime free mode
-## TODO: Usage with redux-saga 
+
+## TODO: Redux-saga support
+
 ## TODO: api
-## TODO: Useful tools (wallaby) 
+
+## TODO: Useful tools (wallaby)

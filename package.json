@@ -2,18 +2,52 @@
   "name": "gluer",
   "version": "0.0.1",
   "description": "Safely glues pure JavaScript code, having developer experience top-notch",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "homepage": "https://github.com/DZakh-packages/gluer#readme",
+  "bugs": {
+    "url": "https://github.com/DZakh-packages/gluer/issues"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/DZakh-packages/gluer.git"
   },
-  "author": "DZakh <dzakh.dev@gmail.com> (https://github.com/DZakh)",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/DZakh-packages/gluer/issues"
+  "author": "DZakh <dzakh.dev@gmail.com> (https://github.com/DZakh)",
+  "main": "index.js",
+  "scripts": {
+    "build": "rollup --config rollup.config.js",
+    "dev": "rollup --config rollup.config.js --watch",
+    "lint": "eslint --cache",
+    "lint:check": "eslint --ext .js,.jsx ./src",
+    "lint:fix": "npm run lint -- --fix --ext .js,.jsx ./src",
+    "pre-commit": "lint-staged",
+    "prettier:check": "prettier --check --ignore-unknown 'src/**/*'",
+    "prettier:fix": "prettier --write --ignore-unknown 'src/**/*'",
+    "test": "jest",
+    "test:ci": "CI=true npm run test -- --coverage"
   },
-  "homepage": "https://github.com/DZakh-packages/gluer#readme"
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run pre-commit"
+    }
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "npm run lint -- --fix"
+    ],
+    "*.{js,jsx,ts,tsx,md,html,css,scss,json}": [
+      "prettier --write"
+    ]
+  },
+  "devDependencies": {
+    "@jest/globals": "^26.6.2",
+    "babel-jest": "^26.6.3",
+    "eslint": "^7.1.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-plugin-import": "^2.25.4",
+    "husky": "^4.3.8",
+    "jest": "^26.6.3",
+    "lint-staged": "^10.5.4",
+    "prettier": "^2.5.1"
+  }
 }
