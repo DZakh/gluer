@@ -48,7 +48,7 @@ For all other users, I won't argue whether you should use TS or something else, 
 - [ ] Support promises as return value
 - [ ] Write d.ts for the package api
 - [ ] Dogfood the package
-- [ ] Prevent using dublicated trait names
+- [ ] Prevent using dublicated interface names
 - [ ] Finish the docs
 - [ ] Add contracts
 - [ ] Show contracts impl names in the profiler instead of anonymous functions

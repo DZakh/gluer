@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { makeTrait } from '../entities/trait.entity';
+import { makeImplInterface } from '../entities/implInterface.entity';
 import { makeGlueImplFactoryService } from './glueImplFactoryService';
 
 describe('Test glueImplFactoryService options validation', () => {
@@ -22,25 +22,25 @@ describe('Test glueImplFactoryService options validation', () => {
     );
   });
 
-  it(`Throws when the "implsTraits" option isn't provided`, () => {
+  it(`Throws when the "impls" option isn't provided`, () => {
     expect(() => {
       glueImplFactoryService.glueImplFactory({ implFactoryName: 'IMPL_FACTORY_NAME' });
     }).toThrowError(
       new Error(
-        'The "implsTraits" property of the implFactory "IMPL_FACTORY_NAME" must be an array of interfaces.'
+        'The "impls" property of the implFactory "IMPL_FACTORY_NAME" must be an array of interfaces.'
       )
     );
   });
 
-  it(`Throws when the "implsTraits" option is empty`, () => {
+  it(`Throws when the "impls" option is empty`, () => {
     expect(() => {
       glueImplFactoryService.glueImplFactory({
         implFactoryName: 'IMPL_FACTORY_NAME',
-        implsTraits: [],
+        impls: [],
       });
     }).toThrowError(
       new Error(
-        'The "implsTraits" property of the implFactory "IMPL_FACTORY_NAME" must be an array of interfaces.'
+        'The "impls" property of the implFactory "IMPL_FACTORY_NAME" must be an array of interfaces.'
       )
     );
   });
@@ -49,7 +49,7 @@ describe('Test glueImplFactoryService options validation', () => {
     expect(
       glueImplFactoryService.glueImplFactory({
         implFactoryName: 'IMPL_FACTORY_NAME',
-        implsTraits: [makeTrait({ name: 'TEST_TRAIT' })],
+        impls: [makeImplInterface({ name: 'TEST_TRAIT' })],
       })
     ).toBeInstanceOf(Function);
   });
@@ -96,7 +96,7 @@ describe('Test glueImplFactoryService implFactory arguments validation', () => {
     };
     const wrappedImplFactory = glueImplFactoryService.glueImplFactory({
       implFactoryName: 'IMPL_FACTORY_NAME',
-      implsTraits: [makeTrait({ name: 'callTestFunction' })],
+      impls: [makeImplInterface({ name: 'callTestFunction' })],
       args: [SCHEMA],
     })(implFactory);
 
@@ -124,7 +124,7 @@ describe('Test glueImplFactoryService implFactory arguments validation', () => {
     };
     const wrappedImplFactory = glueImplFactoryService.glueImplFactory({
       implFactoryName: 'IMPL_FACTORY_NAME',
-      implsTraits: [makeTrait({ name: 'callTestFunction' })],
+      impls: [makeImplInterface({ name: 'callTestFunction' })],
       args: [SCHEMA],
     })(implFactory);
 
@@ -154,7 +154,7 @@ describe('Test glueImplFactoryService implFactory', () => {
     glueImplFactoryService = makeGlueImplFactoryService(ports);
   });
 
-  it('Glues traits to the implementation', () => {
+  it('Glues implInterfaces to the implementation', () => {
     const TRAIT_NAME = 'callTestFunction';
     const IMPL_FN1 = () => {};
     const IMPL_FN2 = () => {};
@@ -162,8 +162,8 @@ describe('Test glueImplFactoryService implFactory', () => {
       [TRAIT_NAME]: IMPL_FN1,
     };
 
-    ports.glueImplUseCase.glueImpl.mockImplementation((trait) => {
-      expect(trait).toStrictEqual(makeTrait({ name: TRAIT_NAME }));
+    ports.glueImplUseCase.glueImpl.mockImplementation((implInterface) => {
+      expect(implInterface).toStrictEqual(makeImplInterface({ name: TRAIT_NAME }));
       return (impl) => {
         expect(impl).toBe(ORIGINAL_IMPL);
         expect(impl[TRAIT_NAME]).toBe(IMPL_FN1);
@@ -178,7 +178,7 @@ describe('Test glueImplFactoryService implFactory', () => {
     };
     const wrappedImplFactory = glueImplFactoryService.glueImplFactory({
       implFactoryName: 'IMPL_FACTORY_NAME',
-      implsTraits: [makeTrait({ name: TRAIT_NAME })],
+      impls: [makeImplInterface({ name: TRAIT_NAME })],
     })(implFactory);
     const impl = wrappedImplFactory();
 
@@ -193,8 +193,8 @@ describe('Test glueImplFactoryService implFactory', () => {
       callTestFunction: () => {},
     };
 
-    ports.glueImplUseCase.glueImpl.mockImplementation((trait) => {
-      expect(trait).toStrictEqual(makeTrait({ name: 'callTestFunction' }));
+    ports.glueImplUseCase.glueImpl.mockImplementation((implInterface) => {
+      expect(implInterface).toStrictEqual(makeImplInterface({ name: 'callTestFunction' }));
       return (impl) => {
         expect(impl).toBe(ORIGINAL_IMPL);
         throw new Error('GLUE_TRAIT_ERROR_MESSAGE');
@@ -206,7 +206,7 @@ describe('Test glueImplFactoryService implFactory', () => {
     };
     const wrappedImplFactory = glueImplFactoryService.glueImplFactory({
       implFactoryName: 'IMPL_FACTORY_NAME',
-      implsTraits: [makeTrait({ name: 'callTestFunction' })],
+      impls: [makeImplInterface({ name: 'callTestFunction' })],
     })(implFactory);
 
     expect(() => {

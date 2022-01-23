@@ -1,33 +1,33 @@
 import {
-  checkIsImplFnGlueMetaWithSameTrait,
-  getImplFnTraitName,
+  checkIsImplFnGlueMetaWithSameInterface,
+  getImplFnInterfaceName,
   makeImplFnGlueMeta,
 } from '../entities/implFnGlueMeta.entity';
 import {
-  checkIsTraitImplemented,
-  getTraitArgsSchemas,
-  getTraitImplFn,
-  getTraitName,
-} from '../entities/trait.entity';
+  checkIsInterfaceImplemented,
+  getInterfaceArgSchemas,
+  getInterfaceImplFn,
+  getInterfaceName,
+} from '../entities/implInterface.entity';
 
-export const makeGlueTraitService = ({ validateValuesBySchemasUseCase }) => {
+export const makeGlueImplService = ({ validateValuesBySchemasUseCase }) => {
   return {
-    glueImpl: (trait) => {
+    glueImpl: (implInterface) => {
       return (impl) => {
-        const traitImplFn = getTraitImplFn(trait, { impl });
+        const interfaceImplFn = getInterfaceImplFn(implInterface, { impl });
 
-        if (!checkIsTraitImplemented(trait, { impl })) {
-          throw new Error(`The trait "${getTraitName(trait)}" is not implemented.`);
+        if (!checkIsInterfaceImplemented(implInterface, { impl })) {
+          throw new Error(`The interface "${getInterfaceName(implInterface)}" is not implemented.`);
         }
 
-        const maybeImplFnGlueMeta = traitImplFn.glueMeta;
+        const maybeImplFnGlueMeta = interfaceImplFn.glueMeta;
         if (maybeImplFnGlueMeta) {
           const implFnGlueMeta = maybeImplFnGlueMeta;
-          if (!checkIsImplFnGlueMetaWithSameTrait(implFnGlueMeta, { trait })) {
+          if (!checkIsImplFnGlueMetaWithSameInterface(implFnGlueMeta, { implInterface })) {
             throw new Error(
-              `The implFn for the trait "${getTraitName(
-                trait
-              )}" already implements another trait "${getImplFnTraitName(implFnGlueMeta)}".`
+              `The implFn for the interface "${getInterfaceName(
+                implInterface
+              )}" already implements another interface "${getImplFnInterfaceName(implFnGlueMeta)}".`
             );
           }
           return impl;
@@ -36,12 +36,14 @@ export const makeGlueTraitService = ({ validateValuesBySchemasUseCase }) => {
         const handler = {
           apply: (target, thisArg, argumentsList) => {
             const argsValidationResult = validateValuesBySchemasUseCase.validateValuesBySchemas({
-              schemas: getTraitArgsSchemas(trait),
+              schemas: getInterfaceArgSchemas(implInterface),
               values: argumentsList,
             });
             if (argsValidationResult instanceof Error) {
               const causeError = argsValidationResult;
-              let message = `Failed arguments validation for the trait "${getTraitName(trait)}".`;
+              let message = `Failed arguments validation for the interface "${getInterfaceName(
+                implInterface
+              )}".`;
               const causeErrorMessage = causeError.message;
               if (causeErrorMessage) {
                 message = `${message} Cause error: ${causeErrorMessage}`;
@@ -52,15 +54,15 @@ export const makeGlueTraitService = ({ validateValuesBySchemasUseCase }) => {
           },
           get: (target, prop, receiver) => {
             if (prop === 'glueMeta') {
-              return makeImplFnGlueMeta({ trait });
+              return makeImplFnGlueMeta({ implInterface });
             }
             return Reflect.get(target, prop, receiver);
           },
         };
-        const proxy = new Proxy(traitImplFn, handler);
+        const proxy = new Proxy(interfaceImplFn, handler);
 
         // eslint-disable-next-line no-param-reassign
-        impl[trait.name] = proxy;
+        impl[implInterface.name] = proxy;
 
         return impl;
       };

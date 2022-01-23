@@ -1,13 +1,13 @@
 export const makeGlueImplFactoryService = ({ glueImplUseCase, validateValuesBySchemasUseCase }) => {
   return {
-    glueImplFactory: ({ implFactoryName, implsTraits, args = [] }) => {
+    glueImplFactory: ({ implFactoryName, impls, args = [] }) => {
       if (!implFactoryName || typeof implFactoryName !== 'string') {
         throw new Error('The "name" option of an implFactory is required and must be a string.');
       }
 
-      if (!(implsTraits && Array.isArray(implsTraits) && implsTraits.length)) {
+      if (!(impls && Array.isArray(impls) && impls.length)) {
         throw new Error(
-          `The "implsTraits" property of the implFactory "${implFactoryName}" must be an array of interfaces.`
+          `The "impls" property of the implFactory "${implFactoryName}" must be an array of interfaces.`
         );
       }
 
@@ -29,9 +29,9 @@ export const makeGlueImplFactoryService = ({ glueImplUseCase, validateValuesBySc
             }
 
             const impl = Reflect.apply(target, thisArg, argumentsList);
-            implsTraits.forEach((trait) => {
+            impls.forEach((implInterface) => {
               try {
-                glueImplUseCase.glueImpl(trait)(impl);
+                glueImplUseCase.glueImpl(implInterface)(impl);
               } catch (error) {
                 throw new Error(`The implFactory "${implFactoryName}" failed. ${error.message}`);
               }

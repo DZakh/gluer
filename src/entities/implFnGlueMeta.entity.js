@@ -1,15 +1,15 @@
-import { getTraitName } from './trait.entity';
+import { getInterfaceName } from './implInterface.entity';
 
-export const makeImplFnGlueMeta = ({ trait }) => {
+export const makeImplFnGlueMeta = ({ implInterface }) => {
   return {
-    trait,
+    implInterface,
   };
 };
 
-export const getImplFnTraitName = (implFnGlueMeta) => {
-  return getTraitName(implFnGlueMeta.trait);
+export const getImplFnInterfaceName = (implFnGlueMeta) => {
+  return getInterfaceName(implFnGlueMeta.implInterface);
 };
 
-export const checkIsImplFnGlueMetaWithSameTrait = (implFnGlueMeta, { trait }) => {
-  return getImplFnTraitName(implFnGlueMeta) === getTraitName(trait);
+export const checkIsImplFnGlueMetaWithSameInterface = (implFnGlueMeta, { implInterface }) => {
+  return getImplFnInterfaceName(implFnGlueMeta) === getInterfaceName(implInterface);
 };
