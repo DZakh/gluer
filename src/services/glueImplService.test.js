@@ -13,36 +13,46 @@ describe('Test glueImplService', () => {
           return new Error('VALIDATION_ERROR_MESSAGE');
         }),
       },
+      handleValidationErrorPort: { handleValidationError: jest.fn() },
     };
     glueImplService = makeGlueImplService(ports);
   });
 
-  it(`Throws when the impl doesn't implement the interface`, () => {
+  it(`Creates validation error when the impl doesn't implement the interface, but still return original impl`, () => {
     const impl = {};
     const implWrapper = glueImplService.glueImpl(makeImplInterface({ name: 'callTestFunction' }));
 
-    expect(() => {
-      implWrapper(impl);
-    }).toThrowError(new Error('The interface "callTestFunction" is not implemented.'));
+    const wrappedImpl = implWrapper(impl);
+
+    expect(ports.handleValidationErrorPort.handleValidationError.mock.calls).toEqual([
+      [new Error('The interface "callTestFunction" is not implemented.')],
+    ]);
+    expect(wrappedImpl).toBe(impl);
   });
 
-  it(`Throws when the implFn called with invalid arguments`, () => {
+  it(`Creates validation error when the implFn called with invalid arguments, but still return a result`, () => {
+    const RESULT = 'RESULT';
     const impl = {
-      callTestFunction: () => {},
+      callTestFunction: () => {
+        return RESULT;
+      },
     };
     const implWrapper = glueImplService.glueImpl(makeImplInterface({ name: 'callTestFunction' }));
     const wrappedImpl = implWrapper(impl);
 
-    expect(() => {
-      wrappedImpl.callTestFunction('some argument');
-    }).toThrowError(
-      new Error(
-        'Failed arguments validation for the interface "callTestFunction". Cause error: VALIDATION_ERROR_MESSAGE'
-      )
-    );
+    const result = wrappedImpl.callTestFunction('some argument');
+
+    expect(ports.handleValidationErrorPort.handleValidationError.mock.calls).toEqual([
+      [
+        new Error(
+          'Failed arguments validation for the interface "callTestFunction". Cause error: VALIDATION_ERROR_MESSAGE'
+        ),
+      ],
+    ]);
+    expect(result).toBe(RESULT);
   });
 
-  it(`Throws when the implFn is a generator function with invalid arguments`, () => {
+  it(`Creates validation error when the implFn is a generator function with invalid arguments, but still return generator`, () => {
     const impl = {
       *callTestFunction() {
         yield undefined;
@@ -51,16 +61,21 @@ describe('Test glueImplService', () => {
     const implWrapper = glueImplService.glueImpl(makeImplInterface({ name: 'callTestFunction' }));
     const wrappedImpl = implWrapper(impl);
 
-    expect(() => {
-      wrappedImpl.callTestFunction('some argument');
-    }).toThrowError(
-      new Error(
-        'Failed arguments validation for the interface "callTestFunction". Cause error: VALIDATION_ERROR_MESSAGE'
-      )
-    );
+    const generator = wrappedImpl.callTestFunction('some argument');
+
+    expect(ports.handleValidationErrorPort.handleValidationError.mock.calls).toEqual([
+      [
+        new Error(
+          'Failed arguments validation for the interface "callTestFunction". Cause error: VALIDATION_ERROR_MESSAGE'
+        ),
+      ],
+    ]);
+    expect(generator.constructor.name).toBe('GeneratorFunctionPrototype');
   });
 
-  it.todo(`Throws when the implFn is a class method with invalid arguments`);
+  it.todo(
+    `Creates validation error when the implFn is a class method with invalid arguments, but still return a result`
+  );
 
   it(`Calls validateValuesBySchemasUseCase when the implFn called with arguments that described in interface`, () => {
     expect.assertions(2);
@@ -87,68 +102,65 @@ describe('Test glueImplService', () => {
     wrappedImpl.callTestFunction(ARGUMENT);
   });
 
-  it(`Throws when validation of implFn arguments returns error`, () => {
-    expect.assertions(3);
-
+  it(`Creates validation error when validation of the implFn arguments failed, but still return a result`, () => {
     const ARGUMENT = 'some argument';
     const SCHEMA = 'test schema';
+    const RESULT = 'RESULT';
 
-    ports.validateValuesBySchemasUseCase.validateValuesBySchemas.mockImplementation(
-      ({ schemas, values }) => {
-        expect(schemas).toStrictEqual([SCHEMA]);
-        expect(values).toStrictEqual([ARGUMENT]);
-        return new Error('VALIDATION_ERROR_MESSAGE');
-      }
-    );
+    ports.validateValuesBySchemasUseCase.validateValuesBySchemas.mockImplementation(() => {
+      return new Error('CUSTOM_VALIDATION_ERROR_MESSAGE');
+    });
 
     const impl = {
-      callTestFunction: () => {},
+      callTestFunction: () => {
+        return RESULT;
+      },
     };
     const implWrapper = glueImplService.glueImpl(
       makeImplInterface({ name: 'callTestFunction', args: [SCHEMA] })
     );
     const wrappedImpl = implWrapper(impl);
 
-    expect(() => {
-      wrappedImpl.callTestFunction(ARGUMENT);
-    }).toThrowError(
-      new Error(
-        `Failed arguments validation for the interface "callTestFunction". Cause error: VALIDATION_ERROR_MESSAGE`
-      )
-    );
+    const result = wrappedImpl.callTestFunction(ARGUMENT);
+
+    expect(ports.handleValidationErrorPort.handleValidationError.mock.calls).toEqual([
+      [
+        new Error(
+          `Failed arguments validation for the interface "callTestFunction". Cause error: CUSTOM_VALIDATION_ERROR_MESSAGE`
+        ),
+      ],
+    ]);
+    expect(ports.validateValuesBySchemasUseCase.validateValuesBySchemas.mock.calls).toEqual([
+      [{ schemas: [SCHEMA], values: [ARGUMENT] }],
+    ]);
+    expect(result).toBe(RESULT);
   });
 
   it(`Proxies implFn only once even when a interface glued multiple times`, () => {
-    expect.assertions(3);
-
-    const ARGUMENT = 'some argument';
-    const SCHEMA = 'test schema';
-
-    ports.validateValuesBySchemasUseCase.validateValuesBySchemas.mockImplementation(
-      ({ schemas, values }) => {
-        expect(schemas).toStrictEqual([SCHEMA]);
-        expect(values).toStrictEqual([ARGUMENT]);
-        return undefined;
-      }
-    );
+    ports.validateValuesBySchemasUseCase.validateValuesBySchemas.mockImplementation(() => {
+      return undefined;
+    });
 
     const impl = {
       callTestFunction: () => {},
     };
     const firstImplWrapper = glueImplService.glueImpl(
-      makeImplInterface({ name: 'callTestFunction', args: [SCHEMA] })
+      makeImplInterface({ name: 'callTestFunction' })
     );
     const secondImplWrapper = glueImplService.glueImpl(
-      makeImplInterface({ name: 'callTestFunction', args: [SCHEMA] })
+      makeImplInterface({ name: 'callTestFunction' })
     );
     const wrappedImplOnce = firstImplWrapper(impl);
     const wrappedImplTwice = secondImplWrapper(wrappedImplOnce);
+
     expect(wrappedImplOnce).toBe(wrappedImplTwice);
 
-    wrappedImplTwice.callTestFunction(ARGUMENT);
+    wrappedImplTwice.callTestFunction();
+
+    expect(ports.validateValuesBySchemasUseCase.validateValuesBySchemas).toHaveBeenCalledTimes(1);
   });
 
-  it(`Throws when the implFn is already glued with another interface`, () => {
+  it(`Creates validation error when the implFn is already glued with another interface, but still return original impl`, () => {
     const SCHEMA = 'test schema';
 
     const impl = {
@@ -161,13 +173,16 @@ describe('Test glueImplService', () => {
       makeImplInterface({ name: 'callTestFunction2', args: [SCHEMA] })
     );
     const wrappedImpl1 = implWrapper1(impl);
+    const impl2 = { callTestFunction2: wrappedImpl1.callTestFunction };
+    const wrappedImpl2 = implWrapper2(impl2);
 
-    expect(() => {
-      implWrapper2({ callTestFunction2: wrappedImpl1.callTestFunction });
-    }).toThrowError(
-      new Error(
-        'The implFn for the interface "callTestFunction2" already implements another interface "callTestFunction".'
-      )
-    );
+    expect(ports.handleValidationErrorPort.handleValidationError.mock.calls).toEqual([
+      [
+        new Error(
+          'The implFn for the interface "callTestFunction2" already implements another interface "callTestFunction".'
+        ),
+      ],
+    ]);
+    expect(wrappedImpl2).toBe(impl2);
   });
 });

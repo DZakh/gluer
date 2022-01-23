@@ -1,4 +1,8 @@
-export const makeGlueImplFactoryService = ({ glueImplUseCase, validateValuesBySchemasUseCase }) => {
+export const makeGlueImplFactoryService = ({
+  glueImplUseCase,
+  validateValuesBySchemasUseCase,
+  handleValidationErrorPort,
+}) => {
   return {
     glueImplFactory: ({ implFactoryName, impls, args = [] }) => {
       if (!implFactoryName || typeof implFactoryName !== 'string') {
@@ -25,7 +29,7 @@ export const makeGlueImplFactoryService = ({ glueImplUseCase, validateValuesBySc
               if (causeErrorMessage) {
                 message = `${message} Cause error: ${causeErrorMessage}`;
               }
-              throw new Error(message);
+              handleValidationErrorPort.handleValidationError(new Error(message));
             }
 
             const impl = Reflect.apply(target, thisArg, argumentsList);
@@ -33,7 +37,9 @@ export const makeGlueImplFactoryService = ({ glueImplUseCase, validateValuesBySc
               try {
                 glueImplUseCase.glueImpl(implInterface)(impl);
               } catch (error) {
-                throw new Error(`The implFactory "${implFactoryName}" failed. ${error.message}`);
+                handleValidationErrorPort.handleValidationError(
+                  new Error(`The implFactory "${implFactoryName}" failed. ${error.message}`)
+                );
               }
             });
             return impl;

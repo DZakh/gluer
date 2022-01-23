@@ -11,6 +11,7 @@ describe('Test glueImplFactoryService options validation', () => {
       validateValuesBySchemasUseCase: {
         validateValuesBySchemas: () => {},
       },
+      handleValidationErrorPort: { handleValidationError: () => {} },
     });
   });
 
@@ -71,23 +72,14 @@ describe('Test glueImplFactoryService implFactory arguments validation', () => {
       validateValuesBySchemasUseCase: {
         validateValuesBySchemas: jest.fn(),
       },
+      handleValidationErrorPort: { handleValidationError: jest.fn() },
     };
     glueImplFactoryService = makeGlueImplFactoryService(ports);
   });
 
   it(`Calls validateValuesBySchemasUseCase when the implFactory called with arguments that described in options`, () => {
-    expect.assertions(2);
-
     const ARGUMENT = 'some argument';
     const SCHEMA = 'test schema';
-
-    ports.validateValuesBySchemasUseCase.validateValuesBySchemas.mockImplementation(
-      ({ schemas, values }) => {
-        expect(schemas).toStrictEqual([SCHEMA]);
-        expect(values).toStrictEqual([ARGUMENT]);
-        return undefined;
-      }
-    );
 
     const implFactory = () => {
       return {
@@ -99,42 +91,64 @@ describe('Test glueImplFactoryService implFactory arguments validation', () => {
       impls: [makeImplInterface({ name: 'callTestFunction' })],
       args: [SCHEMA],
     })(implFactory);
-
     wrappedImplFactory(ARGUMENT);
+
+    expect(ports.validateValuesBySchemasUseCase.validateValuesBySchemas.mock.calls).toEqual([
+      [{ schemas: [SCHEMA], values: [ARGUMENT] }],
+    ]);
   });
 
-  it(`Throws when validation of implFactory arguments returns error`, () => {
-    expect.assertions(3);
-
-    const ARGUMENT = 'some argument';
-    const SCHEMA = 'test schema';
-
-    ports.validateValuesBySchemasUseCase.validateValuesBySchemas.mockImplementation(
-      ({ schemas, values }) => {
-        expect(schemas).toStrictEqual([SCHEMA]);
-        expect(values).toStrictEqual([ARGUMENT]);
+  describe('With failing validation', () => {
+    beforeEach(() => {
+      ports.validateValuesBySchemasUseCase.validateValuesBySchemas.mockImplementation(() => {
         return new Error('VALIDATION_ERROR_MESSAGE');
-      }
-    );
+      });
+    });
 
-    const implFactory = () => {
-      return {
+    it(`Calls handleValidationErrorPort when validation of implFactory arguments returns error`, () => {
+      const ARGUMENT = 'some argument';
+      const SCHEMA = 'test schema';
+
+      const implFactory = () => {
+        return {
+          callTestFunction: () => {},
+        };
+      };
+      const wrappedImplFactory = glueImplFactoryService.glueImplFactory({
+        implFactoryName: 'IMPL_FACTORY_NAME',
+        impls: [makeImplInterface({ name: 'callTestFunction' })],
+        args: [SCHEMA],
+      })(implFactory);
+      wrappedImplFactory(ARGUMENT);
+
+      expect(ports.handleValidationErrorPort.handleValidationError.mock.calls).toEqual([
+        [
+          new Error(
+            `Failed arguments validation for the implFactory "IMPL_FACTORY_NAME". Cause error: VALIDATION_ERROR_MESSAGE`
+          ),
+        ],
+      ]);
+    });
+
+    it(`The implFactory successfully return an impl even though validation has failed`, () => {
+      const ARGUMENT = 'some argument';
+      const SCHEMA = 'test schema';
+      const IMPL = {
         callTestFunction: () => {},
       };
-    };
-    const wrappedImplFactory = glueImplFactoryService.glueImplFactory({
-      implFactoryName: 'IMPL_FACTORY_NAME',
-      impls: [makeImplInterface({ name: 'callTestFunction' })],
-      args: [SCHEMA],
-    })(implFactory);
 
-    expect(() => {
-      wrappedImplFactory(ARGUMENT);
-    }).toThrowError(
-      new Error(
-        `Failed arguments validation for the implFactory "IMPL_FACTORY_NAME". Cause error: VALIDATION_ERROR_MESSAGE`
-      )
-    );
+      const implFactory = () => {
+        return IMPL;
+      };
+      const wrappedImplFactory = glueImplFactoryService.glueImplFactory({
+        implFactoryName: 'IMPL_FACTORY_NAME',
+        impls: [makeImplInterface({ name: 'callTestFunction' })],
+        args: [SCHEMA],
+      })(implFactory);
+      const impl = wrappedImplFactory(ARGUMENT);
+
+      expect(impl).toBe(IMPL);
+    });
   });
 });
 
@@ -150,6 +164,7 @@ describe('Test glueImplFactoryService implFactory', () => {
       validateValuesBySchemasUseCase: {
         validateValuesBySchemas: () => {},
       },
+      handleValidationErrorPort: { handleValidationError: jest.fn() },
     };
     glueImplFactoryService = makeGlueImplFactoryService(ports);
   });
@@ -208,11 +223,10 @@ describe('Test glueImplFactoryService implFactory', () => {
       implFactoryName: 'IMPL_FACTORY_NAME',
       impls: [makeImplInterface({ name: 'callTestFunction' })],
     })(implFactory);
+    wrappedImplFactory();
 
-    expect(() => {
-      wrappedImplFactory();
-    }).toThrowError(
-      new Error('The implFactory "IMPL_FACTORY_NAME" failed. GLUE_TRAIT_ERROR_MESSAGE')
-    );
+    expect(ports.handleValidationErrorPort.handleValidationError.mock.calls).toEqual([
+      [new Error('The implFactory "IMPL_FACTORY_NAME" failed. GLUE_TRAIT_ERROR_MESSAGE')],
+    ]);
   });
 });

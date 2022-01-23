@@ -10,24 +10,34 @@ import {
   getInterfaceName,
 } from '../entities/implInterface.entity';
 
-export const makeGlueImplService = ({ validateValuesBySchemasUseCase }) => {
+export const makeGlueImplService = ({
+  validateValuesBySchemasUseCase,
+  handleValidationErrorPort,
+}) => {
   return {
     glueImpl: (implInterface) => {
       return (impl) => {
         const interfaceImplFn = getInterfaceImplFn(implInterface, { impl });
 
         if (!checkIsInterfaceImplemented(implInterface, { impl })) {
-          throw new Error(`The interface "${getInterfaceName(implInterface)}" is not implemented.`);
+          handleValidationErrorPort.handleValidationError(
+            new Error(`The interface "${getInterfaceName(implInterface)}" is not implemented.`)
+          );
+          return impl;
         }
 
         const maybeImplFnGlueMeta = interfaceImplFn.glueMeta;
         if (maybeImplFnGlueMeta) {
           const implFnGlueMeta = maybeImplFnGlueMeta;
           if (!checkIsImplFnGlueMetaWithSameInterface(implFnGlueMeta, { implInterface })) {
-            throw new Error(
-              `The implFn for the interface "${getInterfaceName(
-                implInterface
-              )}" already implements another interface "${getImplFnInterfaceName(implFnGlueMeta)}".`
+            handleValidationErrorPort.handleValidationError(
+              new Error(
+                `The implFn for the interface "${getInterfaceName(
+                  implInterface
+                )}" already implements another interface "${getImplFnInterfaceName(
+                  implFnGlueMeta
+                )}".`
+              )
             );
           }
           return impl;
@@ -48,7 +58,7 @@ export const makeGlueImplService = ({ validateValuesBySchemasUseCase }) => {
               if (causeErrorMessage) {
                 message = `${message} Cause error: ${causeErrorMessage}`;
               }
-              throw new Error(message);
+              handleValidationErrorPort.handleValidationError(new Error(message));
             }
             return Reflect.apply(target, thisArg, argumentsList);
           },

@@ -20,16 +20,24 @@ export const makeGluer = (gluerOptions) => {
     };
   }
 
+  const gluerOptionsAdapter = {
+    validate: gluerOptions.validate,
+    // eslint-disable-next-line no-console
+    handleValidationError: gluerOptions.handleValidationError || console.error,
+  };
+
   const validateValuesBySchemasService = makeValidateValuesBySchemasService({
-    validatePort: gluerOptions,
+    validatePort: gluerOptionsAdapter,
   });
   const makeImplInterfaceService = makeMakeImplInterfaceService();
   const glueImplService = makeGlueImplService({
     validateValuesBySchemasUseCase: validateValuesBySchemasService,
+    handleValidationErrorPort: gluerOptionsAdapter,
   });
   const glueImplFactoryService = makeGlueImplFactoryService({
     glueImplUseCase: glueImplService,
     validateValuesBySchemasUseCase: validateValuesBySchemasService,
+    handleValidationErrorPort: gluerOptionsAdapter,
   });
 
   return {
