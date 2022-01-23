@@ -43,7 +43,6 @@ For all other users, I won't argue whether you should use TS or something else, 
 
 - [ ] Implementation for production
 - [ ] Add redux-saga support
-- [ ] Add support for classes impl factories
 - [ ] Add validation for proper error handling
 - [ ] Add option for enabling measure marks
 - [ ] Support promises as return value
@@ -51,6 +50,17 @@ For all other users, I won't argue whether you should use TS or something else, 
 - [ ] Dogfood the package
 - [ ] Prevent using dublicated trait names
 - [ ] Finish the docs
-- [ ] Add inline traits
-- [ ] Add generic traits like in rust
-- [ ] Show inline trait names in the profiler instead of anonymous functions
+- [ ] Add contracts
+- [ ] Show contracts impl names in the profiler instead of anonymous functions
+
+## Contributions are welcome
+
+There is some functionality that does not contradict the philosophy of the package, but since we don't have such usecases, they were not implemented.
+
+For example:
+
+- Using classes for the implementation factory
+- Asynchronous implementation factory
+- Generic traits like in rust with &self and impl for
+
+Feel free to create an issue if you need something more.
