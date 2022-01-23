@@ -6,8 +6,12 @@ export const makeTrait = ({ name, returns = undefined, args = [] }) => {
   };
 };
 
+export const getTraitName = (trait) => {
+  return trait.name;
+};
+
 export const getTraitImplFn = (trait, { impl }) => {
-  return impl[trait.name];
+  return impl[getTraitName(trait)];
 };
 
 export const checkIsTraitImplemented = (trait, { impl }) => {
@@ -31,7 +35,7 @@ export const validateTraitImplArgumentsList = (trait, { argumentsList, validate 
 };
 
 export const makeTraitImplArgumentsListValidationErrorMessage = (trait, { causeError }) => {
-  let message = `Failed arguments validation for the trait ${trait.name}.`;
+  let message = `Failed arguments validation for the trait "${getTraitName(trait)}".`;
 
   const causeErrorMessage = (causeError && causeError.message) || '';
   if (causeErrorMessage) {
@@ -39,8 +43,4 @@ export const makeTraitImplArgumentsListValidationErrorMessage = (trait, { causeE
   }
 
   return message;
-};
-
-export const makeTraitNotImplementedErrorMessage = (trait) => {
-  return `The trait ${trait.name} is not implemented.`;
 };

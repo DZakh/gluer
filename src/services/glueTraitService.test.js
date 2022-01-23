@@ -23,7 +23,7 @@ describe('Test glueTraitService', () => {
 
     expect(() => {
       implWrapper(impl);
-    }).toThrowError(new Error('The trait callTestFunction is not implemented.'));
+    }).toThrowError(new Error('The trait "callTestFunction" is not implemented.'));
   });
 
   it(`Doesn't throw when the impl fn called without arguments and trait doesn't require arguments too`, () => {
@@ -49,7 +49,7 @@ describe('Test glueTraitService', () => {
       wrappedImpl.callTestFunction('some argument');
     }).toThrowError(
       new Error(
-        'Failed arguments validation for the trait callTestFunction. Cause error: Provided more arguments than required for trait.'
+        'Failed arguments validation for the trait "callTestFunction". Cause error: Provided more arguments than required for trait.'
       )
     );
   });
@@ -67,7 +67,7 @@ describe('Test glueTraitService', () => {
       wrappedImpl.callTestFunction('some argument');
     }).toThrowError(
       new Error(
-        'Failed arguments validation for the trait callTestFunction. Cause error: Provided more arguments than required for trait.'
+        'Failed arguments validation for the trait "callTestFunction". Cause error: Provided more arguments than required for trait.'
       )
     );
   });
@@ -121,7 +121,58 @@ describe('Test glueTraitService', () => {
       wrappedImpl.callTestFunction(ARGUMENT);
     }).toThrowError(
       new Error(
-        `Failed arguments validation for the trait callTestFunction. Cause error: VALIDATION_ERROR_MESSAGE`
+        `Failed arguments validation for the trait "callTestFunction". Cause error: VALIDATION_ERROR_MESSAGE`
+      )
+    );
+  });
+
+  it(`Proxies implFn only once even when a trait glued multiple times`, () => {
+    expect.assertions(3);
+
+    const ARGUMENT = 'some argument';
+    const SCHEMA = 'test schema';
+
+    ports.validatePort.validate.mockImplementation(({ schema, value }) => {
+      expect(schema).toBe(SCHEMA);
+      expect(value).toBe(ARGUMENT);
+      return undefined;
+    });
+
+    const impl = {
+      callTestFunction: () => {},
+    };
+    const firstImplWrapper = glueTraitService.glueTrait(
+      makeTrait({ name: 'callTestFunction', args: [SCHEMA] })
+    );
+    const secondImplWrapper = glueTraitService.glueTrait(
+      makeTrait({ name: 'callTestFunction', args: [SCHEMA] })
+    );
+    const wrappedImplOnce = firstImplWrapper(impl);
+    const wrappedImplTwice = secondImplWrapper(wrappedImplOnce);
+    expect(wrappedImplOnce).toBe(wrappedImplTwice);
+
+    wrappedImplTwice.callTestFunction(ARGUMENT);
+  });
+
+  it(`Throws when the implFn is already glued with another trait`, () => {
+    const SCHEMA = 'test schema';
+
+    const impl = {
+      callTestFunction: () => {},
+    };
+    const implWrapper1 = glueTraitService.glueTrait(
+      makeTrait({ name: 'callTestFunction', args: [SCHEMA] })
+    );
+    const implWrapper2 = glueTraitService.glueTrait(
+      makeTrait({ name: 'callTestFunction2', args: [SCHEMA] })
+    );
+    const wrappedImpl1 = implWrapper1(impl);
+
+    expect(() => {
+      implWrapper2({ callTestFunction2: wrappedImpl1.callTestFunction });
+    }).toThrowError(
+      new Error(
+        'The implFn for the trait "callTestFunction2" already implements another trait "callTestFunction".'
       )
     );
   });

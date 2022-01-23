@@ -7,7 +7,7 @@ export const makeGlueImplFactoryService = ({ glueTraitUseCase }) => {
 
       if (!(implsTraits && Array.isArray(implsTraits) && implsTraits.length)) {
         throw new Error(
-          `The "implsTraits" property of the implFactory ${implFactoryName} must be an array of interfaces.`
+          `The "implsTraits" property of the implFactory "${implFactoryName}" must be an array of interfaces.`
         );
       }
 
@@ -19,7 +19,7 @@ export const makeGlueImplFactoryService = ({ glueTraitUseCase }) => {
             try {
               impl = glueTraitUseCase.glueTrait(trait)(impl);
             } catch (error) {
-              throw new Error(`The implFactory ${implFactoryName} failed. ${error.message}`);
+              throw new Error(`The implFactory "${implFactoryName}" failed. ${error.message}`);
             }
           });
 

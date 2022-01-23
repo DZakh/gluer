@@ -24,7 +24,7 @@ describe('Test glueImplFactoryService options validation', () => {
       glueImplFactoryService.glueImplFactory({ implFactoryName: 'IMPL_FACTORY_NAME' });
     }).toThrowError(
       new Error(
-        'The "implsTraits" property of the implFactory IMPL_FACTORY_NAME must be an array of interfaces.'
+        'The "implsTraits" property of the implFactory "IMPL_FACTORY_NAME" must be an array of interfaces.'
       )
     );
   });
@@ -37,7 +37,7 @@ describe('Test glueImplFactoryService options validation', () => {
       });
     }).toThrowError(
       new Error(
-        'The "implsTraits" property of the implFactory IMPL_FACTORY_NAME must be an array of interfaces.'
+        'The "implsTraits" property of the implFactory "IMPL_FACTORY_NAME" must be an array of interfaces.'
       )
     );
   });
@@ -118,7 +118,7 @@ describe('Test glueImplFactoryService implFactory', () => {
     expect(() => {
       wrappedImplFactory();
     }).toThrowError(
-      new Error('The implFactory IMPL_FACTORY_NAME failed. GLUE_TRAIT_ERROR_MESSAGE')
+      new Error('The implFactory "IMPL_FACTORY_NAME" failed. GLUE_TRAIT_ERROR_MESSAGE')
     );
   });
 });

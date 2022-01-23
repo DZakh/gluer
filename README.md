@@ -46,7 +46,6 @@ For all other users, I won't argue whether you should use TS or something else, 
 - [ ] Add support for classes impl factories
 - [ ] Add validation for proper error handling
 - [ ] Add option for enabling measure marks
-- [ ] Check that "this" isn't broken
 - [ ] Support promises as return value
 - [ ] Write d.ts for the package api
 - [ ] Dogfood the package
