@@ -13,6 +13,7 @@
   "license": "MIT",
   "author": "DZakh <dzakh.dev@gmail.com> (https://github.com/DZakh)",
   "main": "./src/index.js",
+  "typings": "./src/index.d.ts",
   "scripts": {
     "build": "rollup --config rollup.config.js",
     "dev": "rollup --config rollup.config.js --watch",
@@ -31,7 +32,7 @@
     }
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
+    "*.{js,jsx}": [
       "npm run lint -- --fix"
     ],
     "*.{js,jsx,ts,tsx,md,html,css,scss,json}": [
