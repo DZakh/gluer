@@ -52,6 +52,7 @@ For all other users, I won't argue whether you should use TS or something else, 
 - [ ] Finish the docs
 - [ ] Add contracts
 - [ ] Show contracts impl names in the profiler instead of anonymous functions
+- [ ] Throw unhandled errors
 
 ## Contributions are welcome
 
