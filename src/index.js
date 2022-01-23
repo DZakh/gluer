@@ -1,12 +1,13 @@
 import { makeGlueImplFactoryService } from './services/glueImplFactoryService';
-import { makeGlueTraitService } from './services/glueTraitService';
+import { makeGlueTraitService } from './services/glueImplService';
 import { makeMakeTraitService } from './services/makeTraitService';
+import { makeValidateValuesBySchemasService } from './services/validateValuesBySchemasService';
 
 export const makeGluer = (gluerOptions) => {
   if (process.env.NODE_ENV === 'production') {
     return {
       makeTrait: () => {},
-      glueTrait: () => {
+      glueImpl: () => {
         return (impl) => {
           return impl;
         };
@@ -19,13 +20,21 @@ export const makeGluer = (gluerOptions) => {
     };
   }
 
+  const validateValuesBySchemasService = makeValidateValuesBySchemasService({
+    validatePort: gluerOptions,
+  });
   const makeTraitService = makeMakeTraitService();
-  const glueTraitService = makeGlueTraitService({ validatePort: gluerOptions });
-  const glueImplFactoryService = makeGlueImplFactoryService({ glueTraitUseCase: glueTraitService });
+  const glueImplService = makeGlueTraitService({
+    validateValuesBySchemasUseCase: validateValuesBySchemasService,
+  });
+  const glueImplFactoryService = makeGlueImplFactoryService({
+    glueImplUseCase: glueImplService,
+    validateValuesBySchemasUseCase: validateValuesBySchemasService,
+  });
 
   return {
     makeTrait: makeTraitService.makeTrait,
-    glueTrait: glueTraitService.glueTrait,
+    glueImpl: glueImplService.glueImpl,
     glueImplFactory: glueImplFactoryService.glueImplFactory,
   };
 };

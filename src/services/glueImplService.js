@@ -5,15 +5,14 @@ import {
 } from '../entities/implFnGlueMeta.entity';
 import {
   checkIsTraitImplemented,
+  getTraitArgsSchemas,
   getTraitImplFn,
   getTraitName,
-  makeTraitImplArgumentsListValidationErrorMessage,
-  validateTraitImplArgumentsList,
 } from '../entities/trait.entity';
 
-export const makeGlueTraitService = ({ validatePort }) => {
+export const makeGlueTraitService = ({ validateValuesBySchemasUseCase }) => {
   return {
-    glueTrait: (trait) => {
+    glueImpl: (trait) => {
       return (impl) => {
         const traitImplFn = getTraitImplFn(trait, { impl });
 
@@ -36,16 +35,18 @@ export const makeGlueTraitService = ({ validatePort }) => {
 
         const handler = {
           apply: (target, thisArg, argumentsList) => {
-            const argsValidationResult = validateTraitImplArgumentsList(trait, {
-              argumentsList,
-              validate: validatePort.validate,
+            const argsValidationResult = validateValuesBySchemasUseCase.validateValuesBySchemas({
+              schemas: getTraitArgsSchemas(trait),
+              values: argumentsList,
             });
             if (argsValidationResult instanceof Error) {
-              throw new Error(
-                makeTraitImplArgumentsListValidationErrorMessage(trait, {
-                  causeError: argsValidationResult,
-                })
-              );
+              const causeError = argsValidationResult;
+              let message = `Failed arguments validation for the trait "${getTraitName(trait)}".`;
+              const causeErrorMessage = causeError.message;
+              if (causeErrorMessage) {
+                message = `${message} Cause error: ${causeErrorMessage}`;
+              }
+              throw new Error(message);
             }
             return Reflect.apply(target, thisArg, argumentsList);
           },

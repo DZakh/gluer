@@ -7,7 +7,10 @@ describe('Test glueImplFactoryService options validation', () => {
 
   beforeEach(() => {
     glueImplFactoryService = makeGlueImplFactoryService({
-      glueTraitUseCase: { glueTrait: () => {} },
+      glueImplUseCase: { glueImpl: () => {} },
+      validateValuesBySchemasUseCase: {
+        validateValuesBySchemas: () => {},
+      },
     });
   });
 
@@ -52,14 +55,100 @@ describe('Test glueImplFactoryService options validation', () => {
   });
 });
 
+describe('Test glueImplFactoryService implFactory arguments validation', () => {
+  let glueImplFactoryService = null;
+  let ports = null;
+
+  beforeEach(() => {
+    ports = {
+      glueImplUseCase: {
+        glueImpl: () => {
+          return (impl) => {
+            return impl;
+          };
+        },
+      },
+      validateValuesBySchemasUseCase: {
+        validateValuesBySchemas: jest.fn(),
+      },
+    };
+    glueImplFactoryService = makeGlueImplFactoryService(ports);
+  });
+
+  it(`Calls validateValuesBySchemasUseCase when the implFactory called with arguments that described in options`, () => {
+    expect.assertions(2);
+
+    const ARGUMENT = 'some argument';
+    const SCHEMA = 'test schema';
+
+    ports.validateValuesBySchemasUseCase.validateValuesBySchemas.mockImplementation(
+      ({ schemas, values }) => {
+        expect(schemas).toStrictEqual([SCHEMA]);
+        expect(values).toStrictEqual([ARGUMENT]);
+        return undefined;
+      }
+    );
+
+    const implFactory = () => {
+      return {
+        callTestFunction: () => {},
+      };
+    };
+    const wrappedImplFactory = glueImplFactoryService.glueImplFactory({
+      implFactoryName: 'IMPL_FACTORY_NAME',
+      implsTraits: [makeTrait({ name: 'callTestFunction' })],
+      args: [SCHEMA],
+    })(implFactory);
+
+    wrappedImplFactory(ARGUMENT);
+  });
+
+  it(`Throws when validation of implFactory arguments returns error`, () => {
+    expect.assertions(3);
+
+    const ARGUMENT = 'some argument';
+    const SCHEMA = 'test schema';
+
+    ports.validateValuesBySchemasUseCase.validateValuesBySchemas.mockImplementation(
+      ({ schemas, values }) => {
+        expect(schemas).toStrictEqual([SCHEMA]);
+        expect(values).toStrictEqual([ARGUMENT]);
+        return new Error('VALIDATION_ERROR_MESSAGE');
+      }
+    );
+
+    const implFactory = () => {
+      return {
+        callTestFunction: () => {},
+      };
+    };
+    const wrappedImplFactory = glueImplFactoryService.glueImplFactory({
+      implFactoryName: 'IMPL_FACTORY_NAME',
+      implsTraits: [makeTrait({ name: 'callTestFunction' })],
+      args: [SCHEMA],
+    })(implFactory);
+
+    expect(() => {
+      wrappedImplFactory(ARGUMENT);
+    }).toThrowError(
+      new Error(
+        `Failed arguments validation for the implFactory "IMPL_FACTORY_NAME". Cause error: VALIDATION_ERROR_MESSAGE`
+      )
+    );
+  });
+});
+
 describe('Test glueImplFactoryService implFactory', () => {
   let glueImplFactoryService = null;
   let ports = null;
 
   beforeEach(() => {
     ports = {
-      glueTraitUseCase: {
-        glueTrait: jest.fn(),
+      glueImplUseCase: {
+        glueImpl: jest.fn(),
+      },
+      validateValuesBySchemasUseCase: {
+        validateValuesBySchemas: () => {},
       },
     };
     glueImplFactoryService = makeGlueImplFactoryService(ports);
@@ -73,7 +162,7 @@ describe('Test glueImplFactoryService implFactory', () => {
       callTestFunction: () => {},
     };
 
-    ports.glueTraitUseCase.glueTrait.mockImplementation((trait) => {
+    ports.glueImplUseCase.glueImpl.mockImplementation((trait) => {
       expect(trait).toStrictEqual(makeTrait({ name: 'callTestFunction' }));
       return (impl) => {
         expect(impl).toBe(ORIGINAL_IMPL);
@@ -94,12 +183,12 @@ describe('Test glueImplFactoryService implFactory', () => {
 
   it.todo('Maybe add an optional warning about unused properties');
 
-  it('Rethrows glueTrait error with the implFactory name in it', () => {
+  it('Rethrows glueImpl error with the implFactory name in it', () => {
     const ORIGINAL_IMPL = {
       callTestFunction: () => {},
     };
 
-    ports.glueTraitUseCase.glueTrait.mockImplementation((trait) => {
+    ports.glueImplUseCase.glueImpl.mockImplementation((trait) => {
       expect(trait).toStrictEqual(makeTrait({ name: 'callTestFunction' }));
       return (impl) => {
         expect(impl).toBe(ORIGINAL_IMPL);
