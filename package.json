@@ -40,6 +40,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.13.8",
+    "@babel/plugin-transform-runtime": "^7.16.10",
     "@babel/preset-env": "^7.13.8",
     "@jest/globals": "^26.6.2",
     "babel-jest": "^26.6.3",

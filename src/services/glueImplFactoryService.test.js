@@ -140,7 +140,7 @@ describe('Test implFactoryWrapper created by glueImplFactoryService', () => {
     }).not.toThrow();
   });
 
-  it(`Throws when the impl fn called with arguments that didn't described in trait`, () => {
+  it(`Throws when the impl fn called with arguments that isn't described in trait`, () => {
     const implFactory = () => {
       return {
         callTestFunction: () => {},
@@ -161,6 +161,32 @@ describe('Test implFactoryWrapper created by glueImplFactoryService', () => {
       )
     );
   });
+
+  it(`Throws when the impl fn is a generator function with invalid arguments`, () => {
+    const implFactory = () => {
+      return {
+        *callTestFunction() {
+          yield undefined;
+        },
+      };
+    };
+    const implFactoryWrapper = glueImplFactoryService.glueImplFactory({
+      name: 'IMPL_FACTORY_NAME',
+      implementsTraits: [makeTrait({ name: 'callTestFunction' })],
+    });
+
+    const impl = implFactoryWrapper(implFactory)();
+
+    expect(() => {
+      impl.callTestFunction('some argument');
+    }).toThrowError(
+      new Error(
+        'Failed arguments validation for the trait callTestFunction. Cause error: Provided more arguments than required for trait.'
+      )
+    );
+  });
+
+  it.todo(`Throws when the impl fn is a class method with invalid arguments`);
 
   it(`Calls validatePort when the impl fn called with arguments that described in trait`, () => {
     expect.assertions(2);
