@@ -29,16 +29,19 @@ For all other users, I won't argue whether you should use TS or something else, 
 
 ## TODO: Opinionated architecture decisions
 
-## TODO: Runtime free mode
-
 ## TODO: Redux-saga support
 
 ## TODO: api
+
+## TODO: Recipes
+
+## TODO: Explain naming
 
 ## TODO: Useful tools (wallaby)
 
 ## To the v1 check list
 
+- [ ] Implementation for production
 - [ ] Add redux-saga support
 - [ ] Add support for classes impl factories
 - [ ] Add validation for proper error handling
@@ -51,3 +54,4 @@ For all other users, I won't argue whether you should use TS or something else, 
 - [ ] Finish the docs
 - [ ] Add inline traits
 - [ ] Add generic traits like in rust
+- [ ] Show inline trait names in the profiler instead of anonymous functions

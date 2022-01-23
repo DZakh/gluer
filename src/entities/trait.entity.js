@@ -1,10 +1,4 @@
 export const makeTrait = ({ name, returns = undefined, args = [] }) => {
-  if (process.env.NODE_ENV !== 'production') {
-    if (!name || typeof name !== 'string') {
-      throw new Error('The "name" property of a trait is required and must be a string.');
-    }
-  }
-
   return {
     name,
     returns,
@@ -16,10 +10,8 @@ export const getTraitImplFn = (trait, { impl }) => {
   return impl[trait.name];
 };
 
-export const checkAreAllTraitsImplemented = ({ traits, impl }) => {
-  return traits.every((trait) => {
-    return getTraitImplFn(trait, { impl }) instanceof Function;
-  });
+export const checkIsTraitImplemented = (trait, { impl }) => {
+  return getTraitImplFn(trait, { impl }) instanceof Function;
 };
 
 export const validateTraitImplArgumentsList = (trait, { argumentsList, validate }) => {
@@ -47,4 +39,8 @@ export const makeTraitImplArgumentsListValidationErrorMessage = (trait, { causeE
   }
 
   return message;
+};
+
+export const makeTraitNotImplementedErrorMessage = (trait) => {
+  return `The trait ${trait.name} is not implemented.`;
 };
