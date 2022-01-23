@@ -36,3 +36,18 @@ For all other users, I won't argue whether you should use TS or something else, 
 ## TODO: api
 
 ## TODO: Useful tools (wallaby)
+
+## To the v1 check list
+
+- [ ] Add redux-saga support
+- [ ] Add support for classes impl factories
+- [ ] Add validation for proper error handling
+- [ ] Add option for enabling measure marks
+- [ ] Check that "this" isn't broken
+- [ ] Support promises as return value
+- [ ] Write d.ts for the package api
+- [ ] Dogfood the package
+- [ ] Prevent using dublicated trait names
+- [ ] Finish the docs
+- [ ] Add inline traits
+- [ ] Add generic traits like in rust
