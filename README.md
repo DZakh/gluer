@@ -29,7 +29,23 @@ For all other users, I won't argue whether you should use TS or something else, 
 
 ## TODO: Opinionated architecture decisions
 
+### TODO: Error handling
+
+### TODO: One method per interface
+
 ## TODO: Recipes
+
+TODO: Default setup
+
+### TODO: Recipe: Clean architecture
+
+### TODO: Recipe: Run-time free mode
+
+### TODO: Recipe: With redux-saga
+
+### TODO: Recipe: Contracts for regular functions
+
+### TODO: Recipe: Reliable mocks
 
 ## TODO: api
 
