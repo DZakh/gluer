@@ -28,10 +28,10 @@ export const makeGlueImplFactoryService = ({ glueImplUseCase, validateValuesBySc
               throw new Error(message);
             }
 
-            let impl = Reflect.apply(target, thisArg, argumentsList);
+            const impl = Reflect.apply(target, thisArg, argumentsList);
             implsTraits.forEach((trait) => {
               try {
-                impl = glueImplUseCase.glueImpl(trait)(impl);
+                glueImplUseCase.glueImpl(trait)(impl);
               } catch (error) {
                 throw new Error(`The implFactory "${implFactoryName}" failed. ${error.message}`);
               }

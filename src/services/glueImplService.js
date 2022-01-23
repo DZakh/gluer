@@ -59,10 +59,10 @@ export const makeGlueTraitService = ({ validateValuesBySchemasUseCase }) => {
         };
         const proxy = new Proxy(traitImplFn, handler);
 
-        return {
-          ...impl,
-          [trait.name]: proxy,
-        };
+        // eslint-disable-next-line no-param-reassign
+        impl[trait.name] = proxy;
+
+        return impl;
       };
     },
   };

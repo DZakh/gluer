@@ -155,18 +155,21 @@ describe('Test glueImplFactoryService implFactory', () => {
   });
 
   it('Glues traits to the implementation', () => {
+    const TRAIT_NAME = 'callTestFunction';
+    const IMPL_FN1 = () => {};
+    const IMPL_FN2 = () => {};
     const ORIGINAL_IMPL = {
-      callTestFunction: () => {},
-    };
-    const GLUED_IMPL = {
-      callTestFunction: () => {},
+      [TRAIT_NAME]: IMPL_FN1,
     };
 
     ports.glueImplUseCase.glueImpl.mockImplementation((trait) => {
-      expect(trait).toStrictEqual(makeTrait({ name: 'callTestFunction' }));
+      expect(trait).toStrictEqual(makeTrait({ name: TRAIT_NAME }));
       return (impl) => {
         expect(impl).toBe(ORIGINAL_IMPL);
-        return GLUED_IMPL;
+        expect(impl[TRAIT_NAME]).toBe(IMPL_FN1);
+        // eslint-disable-next-line no-param-reassign
+        impl[TRAIT_NAME] = IMPL_FN2;
+        return impl;
       };
     });
 
@@ -175,10 +178,12 @@ describe('Test glueImplFactoryService implFactory', () => {
     };
     const wrappedImplFactory = glueImplFactoryService.glueImplFactory({
       implFactoryName: 'IMPL_FACTORY_NAME',
-      implsTraits: [makeTrait({ name: 'callTestFunction' })],
+      implsTraits: [makeTrait({ name: TRAIT_NAME })],
     })(implFactory);
+    const impl = wrappedImplFactory();
 
-    expect(wrappedImplFactory()).toBe(GLUED_IMPL);
+    expect(impl).toBe(ORIGINAL_IMPL);
+    expect(impl[TRAIT_NAME]).toBe(IMPL_FN2);
   });
 
   it.todo('Maybe add an optional warning about unused properties');
