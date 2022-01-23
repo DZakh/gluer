@@ -1,6 +1,6 @@
 # Gluer
 
-Safely glues **pure JavaScript** code, having developer experience top-notch.
+Safely glues **pure JavaScript** code having developer experience top-notch.
 
 ## Why?
 
