@@ -29,30 +29,26 @@ For all other users, I won't argue whether you should use TS or something else, 
 
 ## TODO: Opinionated architecture decisions
 
-## TODO: Redux-saga support
+## TODO: Recipes
 
 ## TODO: api
 
-## TODO: Recipes
-
-## TODO: Explain naming
-
 ## TODO: Useful tools (wallaby)
 
-## To the v1 check list
+## Roadmap to v1
 
-- [ ] Implementation for production
-- [ ] Add redux-saga support
-- [ ] Add validation for proper error handling
-- [ ] Add option for enabling measure marks
-- [ ] Support promises as return value
-- [ ] Write d.ts for the package api
-- [ ] Dogfood the package
-- [ ] Prevent using dublicated interface names
+- [ ] Add d.ts for the package api
+- [ ] Validate implFn return value
+- [ ] Support implFn return value validation for async functions
+- [ ] Support implFn return value validation for generators (redux-saga specifically)
+- [ ] Track unhandled errors during return value validation
+- [ ] Add performance profiler mode
+- [ ] Properly test the whole package
+- [ ] Use the package to test itself, to showcase the run-time free mode
+- [ ] Prevent creating interfaces with dublicated names
 - [ ] Finish the docs
-- [ ] Add contracts
-- [ ] Show contracts impl names in the profiler instead of anonymous functions
-- [ ] Throw unhandled errors
+- [ ] Add inline interfaces
+- [ ] Add fixtures factory utility
 
 ## Contributions are welcome
 
