@@ -15,7 +15,7 @@ export const makeGlueImplFactoryService = ({ validatePort }) => {
       return (...args) => {
         let impl = implFactory(...args);
 
-        if (checkAreAllTraitsImplemented({ traits: implementsTraits, impl })) {
+        if (!checkAreAllTraitsImplemented({ traits: implementsTraits, impl })) {
           throw new Error(
             `The implementation of the ${implFactoryName} implFactory doesn't implement all the traits.`
           );
@@ -59,7 +59,7 @@ export const makeGlueImplFactoryService = ({ validatePort }) => {
         if (process.env.NODE_ENV !== 'production') {
           if (!implFactoryName || typeof implFactoryName !== 'string') {
             throw new Error(
-              'The "name" property of an implFactory is required and must be a string.'
+              'The "name" option of an implFactory is required and must be a string.'
             );
           }
         }

@@ -23,6 +23,10 @@ export const checkAreAllTraitsImplemented = ({ traits, impl }) => {
 };
 
 export const validateTraitImplArgumentsList = (trait, { argumentsList, validate }) => {
+  if (trait.args.length < argumentsList.length) {
+    return new Error('Provided more arguments than required for trait.');
+  }
+
   for (let i = 0; i < trait.args.length; i += 1) {
     const traitArgSchema = trait.args[i];
     const arg = argumentsList[i];
@@ -39,7 +43,7 @@ export const makeTraitImplArgumentsListValidationErrorMessage = (trait, { causeE
 
   const causeErrorMessage = (causeError && causeError.message) || '';
   if (causeErrorMessage) {
-    message = `${message} ${causeErrorMessage}`;
+    message = `${message} Cause error: ${causeErrorMessage}`;
   }
 
   return message;
