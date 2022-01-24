@@ -17,40 +17,42 @@ describe('Test glueImplFactoryService options validation', () => {
 
   it(`Throws when the "name" option isn't provided`, () => {
     expect(() => {
-      glueImplFactoryService.glueImplFactory({});
+      glueImplFactoryService.glueImplFactory();
     }).toThrowError(
       new Error('The "name" option of an implFactory is required and must be a string.')
     );
   });
 
-  it(`Throws when the "impls" option isn't provided`, () => {
+  it(`Throws when the "implements" option isn't provided`, () => {
     expect(() => {
-      glueImplFactoryService.glueImplFactory({ implFactoryName: 'IMPL_FACTORY_NAME' });
+      glueImplFactoryService.glueImplFactory('IMPL_FACTORY_NAME');
     }).toThrowError(
       new Error(
-        'The "impls" property of the implFactory "IMPL_FACTORY_NAME" must be an array of interfaces.'
+        'The "implements" option of the implFactory "IMPL_FACTORY_NAME" must be an array of interfaces.'
       )
     );
   });
 
-  it(`Throws when the "impls" option is empty`, () => {
+  it(`Throws when the "implements" option is empty`, () => {
     expect(() => {
-      glueImplFactoryService.glueImplFactory({
-        implFactoryName: 'IMPL_FACTORY_NAME',
-        impls: [],
+      glueImplFactoryService.glueImplFactory('IMPL_FACTORY_NAME', () => {
+        return {
+          implements: [],
+        };
       });
     }).toThrowError(
       new Error(
-        'The "impls" property of the implFactory "IMPL_FACTORY_NAME" must be an array of interfaces.'
+        'The "implements" option of the implFactory "IMPL_FACTORY_NAME" must be an array of interfaces.'
       )
     );
   });
 
   it(`Returns an implFactoryWrapper function when options provided without a problem `, () => {
     expect(
-      glueImplFactoryService.glueImplFactory({
-        implFactoryName: 'IMPL_FACTORY_NAME',
-        impls: [makeImplInterface({ name: 'TEST_TRAIT' })],
+      glueImplFactoryService.glueImplFactory('IMPL_FACTORY_NAME', () => {
+        return {
+          implements: [makeImplInterface({ name: 'TEST_TRAIT' })],
+        };
       })
     ).toBeInstanceOf(Function);
   });
@@ -86,10 +88,11 @@ describe('Test glueImplFactoryService implFactory arguments validation', () => {
         callTestFunction: () => {},
       };
     };
-    const wrappedImplFactory = glueImplFactoryService.glueImplFactory({
-      implFactoryName: 'IMPL_FACTORY_NAME',
-      impls: [makeImplInterface({ name: 'callTestFunction' })],
-      args: [SCHEMA],
+    const wrappedImplFactory = glueImplFactoryService.glueImplFactory('IMPL_FACTORY_NAME', () => {
+      return {
+        implements: [makeImplInterface({ name: 'callTestFunction' })],
+        args: [SCHEMA],
+      };
     })(implFactory);
     wrappedImplFactory(ARGUMENT);
 
@@ -114,10 +117,11 @@ describe('Test glueImplFactoryService implFactory arguments validation', () => {
           callTestFunction: () => {},
         };
       };
-      const wrappedImplFactory = glueImplFactoryService.glueImplFactory({
-        implFactoryName: 'IMPL_FACTORY_NAME',
-        impls: [makeImplInterface({ name: 'callTestFunction' })],
-        args: [SCHEMA],
+      const wrappedImplFactory = glueImplFactoryService.glueImplFactory('IMPL_FACTORY_NAME', () => {
+        return {
+          implements: [makeImplInterface({ name: 'callTestFunction' })],
+          args: [SCHEMA],
+        };
       })(implFactory);
       wrappedImplFactory(ARGUMENT);
 
@@ -140,10 +144,11 @@ describe('Test glueImplFactoryService implFactory arguments validation', () => {
       const implFactory = () => {
         return IMPL;
       };
-      const wrappedImplFactory = glueImplFactoryService.glueImplFactory({
-        implFactoryName: 'IMPL_FACTORY_NAME',
-        impls: [makeImplInterface({ name: 'callTestFunction' })],
-        args: [SCHEMA],
+      const wrappedImplFactory = glueImplFactoryService.glueImplFactory('IMPL_FACTORY_NAME', () => {
+        return {
+          implements: [makeImplInterface({ name: 'callTestFunction' })],
+          args: [SCHEMA],
+        };
       })(implFactory);
       const impl = wrappedImplFactory(ARGUMENT);
 
@@ -191,9 +196,10 @@ describe('Test glueImplFactoryService implFactory', () => {
     const implFactory = () => {
       return ORIGINAL_IMPL;
     };
-    const wrappedImplFactory = glueImplFactoryService.glueImplFactory({
-      implFactoryName: 'IMPL_FACTORY_NAME',
-      impls: [makeImplInterface({ name: TRAIT_NAME })],
+    const wrappedImplFactory = glueImplFactoryService.glueImplFactory('IMPL_FACTORY_NAME', () => {
+      return {
+        implements: [makeImplInterface({ name: TRAIT_NAME })],
+      };
     })(implFactory);
     const impl = wrappedImplFactory();
 
@@ -219,9 +225,10 @@ describe('Test glueImplFactoryService implFactory', () => {
     const implFactory = () => {
       return ORIGINAL_IMPL;
     };
-    const wrappedImplFactory = glueImplFactoryService.glueImplFactory({
-      implFactoryName: 'IMPL_FACTORY_NAME',
-      impls: [makeImplInterface({ name: 'callTestFunction' })],
+    const wrappedImplFactory = glueImplFactoryService.glueImplFactory('IMPL_FACTORY_NAME', () => {
+      return {
+        implements: [makeImplInterface({ name: 'callTestFunction' })],
+      };
     })(implFactory);
     wrappedImplFactory();
 

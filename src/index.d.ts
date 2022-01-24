@@ -1,38 +1,26 @@
-export interface Schema {
-  unknown;
-}
+export interface Schema {}
 
-export interface Value {
-  unknown;
-}
-
-export interface interface {
-  unknown;
-}
+export interface Interface {}
 
 export interface GluerOptions {
-  validate: ({ schema, value }: { schema: Schema; value: Value }) => void | Error;
+  validate: ({ schema, value }: { schema: Schema; value: unknown }) => void | Error;
   handleValidationError?: (error: Error) => void;
 }
 
 export function makeGluer(gluerOptions: GluerOptions): {
-  makeImplInterface: ({
-    name,
-    returns,
-    args,
-  }: {
-    name: string;
-    returns?: never;
-    args?: Schema[];
-  }) => interface;
-  glueImpl: (implInterface: interface) => <T>(impl: T) => T;
-  glueImplFactory: ({
-    implFactoryName,
-    impls,
-    args,
-  }: {
-    implFactoryName: string;
-    impls: interface[];
-    args?: Schema[];
-  }) => <T>(implFactory: T) => T;
+  makeInterface: (
+    name: string,
+    interfaceMetaLoader?: () => {
+      returns?: never;
+      args?: Schema[];
+    }
+  ) => Interface;
+  glueImpl: (implInterface: Interface) => <T>(impl: T) => T;
+  glueImplFactory: (
+    implFactoryName: string,
+    implFactoryMetaLoader: () => {
+      implements: Interface[];
+      args?: Schema[];
+    }
+  ) => <T>(implFactory: T) => T;
 };

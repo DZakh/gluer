@@ -4,14 +4,22 @@ export const makeGlueImplFactoryService = ({
   handleValidationErrorPort,
 }) => {
   return {
-    glueImplFactory: ({ implFactoryName, impls, args = [] }) => {
+    glueImplFactory: (implFactoryName, implFactoryMetaLoader) => {
       if (!implFactoryName || typeof implFactoryName !== 'string') {
         throw new Error('The "name" option of an implFactory is required and must be a string.');
       }
 
+      if (!(implFactoryMetaLoader instanceof Function)) {
+        throw new Error(
+          `The "implements" option of the implFactory "${implFactoryName}" must be an array of interfaces.`
+        );
+      }
+
+      const { implements: impls, args = [] } = implFactoryMetaLoader();
+
       if (!(impls && Array.isArray(impls) && impls.length)) {
         throw new Error(
-          `The "impls" property of the implFactory "${implFactoryName}" must be an array of interfaces.`
+          `The "implements" option of the implFactory "${implFactoryName}" must be an array of interfaces.`
         );
       }
 

@@ -1,12 +1,12 @@
 import { makeGlueImplFactoryService } from './services/glueImplFactoryService';
 import { makeGlueImplService } from './services/glueImplService';
-import { makeMakeImplInterfaceService } from './services/makeImplInterfaceService';
+import { makeMakeInterfaceService } from './services/makeInterfaceService';
 import { makeValidateValuesBySchemasService } from './services/validateValuesBySchemasService';
 
 export const makeGluer = (gluerOptions) => {
   if (process.env.NODE_ENV === 'production') {
     return {
-      makeImplInterface: () => {},
+      makeInterface: () => {},
       glueImpl: () => {
         return (impl) => {
           return impl;
@@ -29,7 +29,7 @@ export const makeGluer = (gluerOptions) => {
   const validateValuesBySchemasService = makeValidateValuesBySchemasService({
     validatePort: gluerOptionsAdapter,
   });
-  const makeImplInterfaceService = makeMakeImplInterfaceService();
+  const makeInterfaceService = makeMakeInterfaceService();
   const glueImplService = makeGlueImplService({
     validateValuesBySchemasUseCase: validateValuesBySchemasService,
     handleValidationErrorPort: gluerOptionsAdapter,
@@ -41,7 +41,7 @@ export const makeGluer = (gluerOptions) => {
   });
 
   return {
-    makeImplInterface: makeImplInterfaceService.makeImplInterface,
+    makeInterface: makeInterfaceService.makeInterface,
     glueImpl: glueImplService.glueImpl,
     glueImplFactory: glueImplFactoryService.glueImplFactory,
   };
