@@ -63,31 +63,33 @@ export const makeGlueImplFactoryService = ({ glueImplUseCase, handleValidationEr
       return (implFactory) => {
         const handler = {
           apply: (target, thisArg, argumentsList) => {
-            const [providedDependencies = {}] = argumentsList;
-            const validateProvidedDependenciesResult = validateProvidedDependencies(
-              depends,
-              providedDependencies
-            );
-            if (validateProvidedDependenciesResult instanceof Error) {
-              const causeError = validateProvidedDependenciesResult;
-              let message = `Failed dependencies validation for the implFactory "${implFactoryName}".`;
-              const causeErrorMessage = causeError.message;
-              if (causeErrorMessage) {
-                message = `${message} Cause error: ${causeErrorMessage}`;
-              }
-              handleValidationErrorPort.handleValidationError(new Error(message));
-            } else {
-              Object.keys(depends).forEach((dependencyName) => {
-                const dependencyInterfaceMeta = depends[dependencyName];
-                const dependencyImpl = providedDependencies[dependencyName];
-                try {
-                  glueImplUseCase.glueImpl(dependencyInterfaceMeta)(dependencyImpl);
-                } catch (error) {
-                  handleValidationErrorPort.handleValidationError(
-                    new Error(`The implFactory "${implFactoryName}" failed. ${error.message}`)
-                  );
+            if (depends !== null) {
+              const [providedDependencies = {}] = argumentsList;
+              const validateProvidedDependenciesResult = validateProvidedDependencies(
+                depends,
+                providedDependencies
+              );
+              if (validateProvidedDependenciesResult instanceof Error) {
+                const causeError = validateProvidedDependenciesResult;
+                let message = `Failed dependencies validation for the implFactory "${implFactoryName}".`;
+                const causeErrorMessage = causeError.message;
+                if (causeErrorMessage) {
+                  message = `${message} Cause error: ${causeErrorMessage}`;
                 }
-              });
+                handleValidationErrorPort.handleValidationError(new Error(message));
+              } else {
+                Object.keys(depends).forEach((dependencyName) => {
+                  const dependencyInterfaceMeta = depends[dependencyName];
+                  const dependencyImpl = providedDependencies[dependencyName];
+                  try {
+                    glueImplUseCase.glueImpl(dependencyInterfaceMeta)(dependencyImpl);
+                  } catch (error) {
+                    handleValidationErrorPort.handleValidationError(
+                      new Error(`The implFactory "${implFactoryName}" failed. ${error.message}`)
+                    );
+                  }
+                });
+              }
             }
 
             const impl = Reflect.apply(target, thisArg, argumentsList);

@@ -18,6 +18,6 @@ export function makeGluer(gluerOptions: GluerOptions): {
   glueImplFactory: (
     implFactoryName: string,
     implements: Interface[],
-    depends?: Record<string, Interface>
+    depends?: Record<string, Interface> | null
   ) => <T>(implFactory: T) => T;
 };
