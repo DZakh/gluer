@@ -17,7 +17,7 @@ describe('Test glueImplFactoryService options validation', () => {
 
   it(`Throws when the "name" option isn't provided`, () => {
     expect(() => {
-      glueImplFactoryService.glueImplFactory();
+      glueImplFactoryService.glueImplFactory({});
     }).toThrowError(
       new Error('The "name" option of an implFactory is required and must be a string.')
     );
@@ -25,7 +25,7 @@ describe('Test glueImplFactoryService options validation', () => {
 
   it(`Throws when the "implements" option isn't provided`, () => {
     expect(() => {
-      glueImplFactoryService.glueImplFactory('IMPL_FACTORY_NAME');
+      glueImplFactoryService.glueImplFactory({ implFactoryName: 'IMPL_FACTORY_NAME' });
     }).toThrowError(
       new Error(
         'The "implements" option of the implFactory "IMPL_FACTORY_NAME" must be an array of interfaces.'
@@ -35,10 +35,9 @@ describe('Test glueImplFactoryService options validation', () => {
 
   it(`Throws when the "implements" option is empty`, () => {
     expect(() => {
-      glueImplFactoryService.glueImplFactory('IMPL_FACTORY_NAME', () => {
-        return {
-          implements: [],
-        };
+      glueImplFactoryService.glueImplFactory({
+        implFactoryName: 'IMPL_FACTORY_NAME',
+        implements: [],
       });
     }).toThrowError(
       new Error(
@@ -49,111 +48,11 @@ describe('Test glueImplFactoryService options validation', () => {
 
   it(`Returns an implFactoryWrapper function when options provided without a problem `, () => {
     expect(
-      glueImplFactoryService.glueImplFactory('IMPL_FACTORY_NAME', () => {
-        return {
-          implements: [makeImplInterface({ name: 'TEST_TRAIT' })],
-        };
+      glueImplFactoryService.glueImplFactory({
+        implFactoryName: 'IMPL_FACTORY_NAME',
+        implements: [makeImplInterface({ name: 'TEST_TRAIT' })],
       })
     ).toBeInstanceOf(Function);
-  });
-});
-
-describe('Test glueImplFactoryService implFactory arguments validation', () => {
-  let glueImplFactoryService = null;
-  let ports = null;
-
-  beforeEach(() => {
-    ports = {
-      glueImplUseCase: {
-        glueImpl: () => {
-          return (impl) => {
-            return impl;
-          };
-        },
-      },
-      validateValuesBySchemasUseCase: {
-        validateValuesBySchemas: jest.fn(),
-      },
-      handleValidationErrorPort: { handleValidationError: jest.fn() },
-    };
-    glueImplFactoryService = makeGlueImplFactoryService(ports);
-  });
-
-  it(`Calls validateValuesBySchemasUseCase when the implFactory called with arguments that described in options`, () => {
-    const ARGUMENT = 'some argument';
-    const SCHEMA = 'test schema';
-
-    const implFactory = () => {
-      return {
-        callTestFunction: () => {},
-      };
-    };
-    const wrappedImplFactory = glueImplFactoryService.glueImplFactory('IMPL_FACTORY_NAME', () => {
-      return {
-        implements: [makeImplInterface({ name: 'callTestFunction' })],
-        args: [SCHEMA],
-      };
-    })(implFactory);
-    wrappedImplFactory(ARGUMENT);
-
-    expect(ports.validateValuesBySchemasUseCase.validateValuesBySchemas.mock.calls).toEqual([
-      [{ schemas: [SCHEMA], values: [ARGUMENT] }],
-    ]);
-  });
-
-  describe('With failing validation', () => {
-    beforeEach(() => {
-      ports.validateValuesBySchemasUseCase.validateValuesBySchemas.mockImplementation(() => {
-        return new Error('VALIDATION_ERROR_MESSAGE');
-      });
-    });
-
-    it(`Calls handleValidationErrorPort when validation of implFactory arguments returns error`, () => {
-      const ARGUMENT = 'some argument';
-      const SCHEMA = 'test schema';
-
-      const implFactory = () => {
-        return {
-          callTestFunction: () => {},
-        };
-      };
-      const wrappedImplFactory = glueImplFactoryService.glueImplFactory('IMPL_FACTORY_NAME', () => {
-        return {
-          implements: [makeImplInterface({ name: 'callTestFunction' })],
-          args: [SCHEMA],
-        };
-      })(implFactory);
-      wrappedImplFactory(ARGUMENT);
-
-      expect(ports.handleValidationErrorPort.handleValidationError.mock.calls).toEqual([
-        [
-          new Error(
-            `Failed arguments validation for the implFactory "IMPL_FACTORY_NAME". Cause error: VALIDATION_ERROR_MESSAGE`
-          ),
-        ],
-      ]);
-    });
-
-    it(`The implFactory successfully return an impl even though validation has failed`, () => {
-      const ARGUMENT = 'some argument';
-      const SCHEMA = 'test schema';
-      const IMPL = {
-        callTestFunction: () => {},
-      };
-
-      const implFactory = () => {
-        return IMPL;
-      };
-      const wrappedImplFactory = glueImplFactoryService.glueImplFactory('IMPL_FACTORY_NAME', () => {
-        return {
-          implements: [makeImplInterface({ name: 'callTestFunction' })],
-          args: [SCHEMA],
-        };
-      })(implFactory);
-      const impl = wrappedImplFactory(ARGUMENT);
-
-      expect(impl).toBe(IMPL);
-    });
   });
 });
 
@@ -196,10 +95,9 @@ describe('Test glueImplFactoryService implFactory', () => {
     const implFactory = () => {
       return ORIGINAL_IMPL;
     };
-    const wrappedImplFactory = glueImplFactoryService.glueImplFactory('IMPL_FACTORY_NAME', () => {
-      return {
-        implements: [makeImplInterface({ name: TRAIT_NAME })],
-      };
+    const wrappedImplFactory = glueImplFactoryService.glueImplFactory({
+      implFactoryName: 'IMPL_FACTORY_NAME',
+      implements: [makeImplInterface({ name: TRAIT_NAME })],
     })(implFactory);
     const impl = wrappedImplFactory();
 
@@ -225,10 +123,9 @@ describe('Test glueImplFactoryService implFactory', () => {
     const implFactory = () => {
       return ORIGINAL_IMPL;
     };
-    const wrappedImplFactory = glueImplFactoryService.glueImplFactory('IMPL_FACTORY_NAME', () => {
-      return {
-        implements: [makeImplInterface({ name: 'callTestFunction' })],
-      };
+    const wrappedImplFactory = glueImplFactoryService.glueImplFactory({
+      implFactoryName: 'IMPL_FACTORY_NAME',
+      implements: [makeImplInterface({ name: 'callTestFunction' })],
     })(implFactory);
     wrappedImplFactory();
 

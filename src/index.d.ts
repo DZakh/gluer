@@ -15,12 +15,9 @@ export function makeGluer(gluerOptions: GluerOptions): {
       args?: Schema[];
     }
   ) => Interface;
-  glueImpl: (implInterface: Interface) => <T>(impl: T) => T;
   glueImplFactory: (
     implFactoryName: string,
-    implFactoryMetaLoader: () => {
-      implements: Interface[];
-      args?: Schema[];
-    }
+    implements: Interface[],
+    depends?: Record<string, Interface>
   ) => <T>(implFactory: T) => T;
 };

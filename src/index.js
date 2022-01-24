@@ -7,11 +7,6 @@ export const makeGluer = (gluerOptions) => {
   if (process.env.NODE_ENV === 'production') {
     return {
       makeInterface: () => {},
-      glueImpl: () => {
-        return (impl) => {
-          return impl;
-        };
-      },
       glueImplFactory: () => {
         return (implFactory) => {
           return implFactory;
@@ -36,13 +31,11 @@ export const makeGluer = (gluerOptions) => {
   });
   const glueImplFactoryService = makeGlueImplFactoryService({
     glueImplUseCase: glueImplService,
-    validateValuesBySchemasUseCase: validateValuesBySchemasService,
     handleValidationErrorPort: gluerOptionsAdapter,
   });
 
   return {
     makeInterface: makeInterfaceService.makeInterface,
-    glueImpl: glueImplService.glueImpl,
     glueImplFactory: glueImplFactoryService.glueImplFactory,
   };
 };
