@@ -2,13 +2,13 @@
   "name": "gluer",
   "version": "0.0.9",
   "description": "Safely glues pure JavaScript code having developer experience top-notch",
-  "homepage": "https://github.com/DZakh-packages/gluer#readme",
+  "homepage": "https://github.com/DZakh/gluer#readme",
   "bugs": {
-    "url": "https://github.com/DZakh-packages/gluer/issues"
+    "url": "https://github.com/DZakh/gluer/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/DZakh-packages/gluer.git"
+    "url": "git+https://github.com/DZakh/gluer.git"
   },
   "license": "MIT",
   "author": "DZakh <dzakh.dev@gmail.com> (https://github.com/DZakh)",
